@@ -162,17 +162,19 @@ if __name__ == "__main__":
     #获取模型使用预训练参数
     if config.model_class == 121:
         model = models.densenet121(pretrained=True)
-    elif config.model_class == 161:
-        model = models.densenet161(pretrained=True)
-    elif config.model_class == 169:
-        model = models.densenet169(pretrained=True)
-    elif config.model_class == 201:
-        model = models.densenet201(pretrained=True)
+        model.features.conv0 = nn.Conv2d(config.init_channel, 64, kernel_size=7, stride=2,padding=3, bias=False)
     else:
-        print("模型选择错误！")
+        model.features.conv0 = nn.Conv2d(config.init_channel, 96, kernel_size=7, stride=2,padding=3, bias=False)
+        if config.model_class == 161:
+            model = models.densenet161(pretrained=True)
+        elif config.model_class == 169:
+            model = models.densenet169(pretrained=True)
+        elif config.model_class == 201:
+            model = models.densenet201(pretrained=True)
+        else:
+            print("模型选择错误！")
     
     #并修改原始通道数和分类数
-    model.features.conv0 = nn.Conv2d(config.init_channel, 64, kernel_size=7, stride=2,padding=3, bias=False)
     num_ftrs = model.classifier.in_features
     model.classifier = nn.Linear(num_ftrs, config.classify)
     model.to(device)
