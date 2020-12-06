@@ -104,7 +104,8 @@ def train_valid(model, config, train_loader, valid_loader):
                 valid_loss,
                 valid_acc,
             ))
-            f.write('End Time%s\n' % (time.strftime('%m%d_%H%M_%S',time.localtime(time.time()))))
+    with open(result_file_path, 'a') as f:
+        f.write('End Time%s\n' % (time.strftime('%m%d_%H%M_%S',time.localtime(time.time()))))
 
 
 def test(test_loader):

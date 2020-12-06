@@ -1,5 +1,5 @@
 class TrainingConfig(object):
-    batch_size = 10
+    batch_size = 8
     lr = 0.01
     epoches = 50
     show_n_iter = 10#执行多少个iter展示一次当前参数
