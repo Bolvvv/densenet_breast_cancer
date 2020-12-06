@@ -131,3 +131,5 @@ dmypy.json
 results.csv
 nohup.out
 model.dat
+test.py
+result/

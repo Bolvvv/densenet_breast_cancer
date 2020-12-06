@@ -14,7 +14,7 @@ class CustomDataset(Dataset):
     def __getitem__(self, i):
         index = i % self.len
         image_name , label = self.image_label_list[index]
-        image_path = os.path.join(self.image_dir, image_name+".png")
+        image_path = os.path.join(self.image_dir, image_name)
         img = Image.open(image_path)
 
         #对图片进行预处理
