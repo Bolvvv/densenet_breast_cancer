@@ -35,3 +35,7 @@ def write_file(file_list, file_name):
         for i in file_list:
             (name, label) = i
             f.writelines(name+" "+label+"\n")
+
+l = read_file("../data/deepbc/labels_1218/test_BX.txt","../data/deepbc/usg_images_cutted_p1/")
+write_file(l, "tmp_1.txt")
+print(len(l))

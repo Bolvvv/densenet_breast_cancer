@@ -12,7 +12,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def train_step(model, config, train_loader, criterion, optimizer, epoch):
     model.train()
 
-    # Train the model
+    #显示参数设定
     total_step = len(train_loader)
     correct = 0
     total = 0
@@ -35,7 +35,7 @@ def train_step(model, config, train_loader, criterion, optimizer, epoch):
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
-        total_loss += loss.item() #由于损失是均值，因此返回总的损失值
+        total_loss += loss.item()
 
         n_iter_loss += loss.item()
         if (i+1) % config.show_n_iter == 0:
@@ -82,9 +82,9 @@ def train_valid(model, config, train_loader, valid_loader):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
     result_file_path = './result/'+time.strftime('%m%d_%H%M_%S',time.localtime(time.time()))+'_results.csv'
-    #将信息写入csv文件zhong 
+    #将信息写入csv文件中
     with open(result_file_path, 'w') as f:
-        f.write('batch_size %d, lr %f, epoches %d, model_class %s, start_time %s\n' % (config.batch_size, config.lr, config.epoches, config.model_class, time.strftime('%m%d_%H%M_%S',time.localtime(time.time()))))
+        f.write('batch_size %d, lr %f, epoches %d, model_class %s, start_time %s\n' % (config.batch_size, config.lr, config.epoches, config.model_class, time.strftime('%m-%d %H:%M:%S',time.localtime(time.time()))))
         f.write('epoch,train_loss,train_acc,valid_loss,valid_acc\n')
 
     for epoch in range(config.epoches):
@@ -105,10 +105,10 @@ def train_valid(model, config, train_loader, valid_loader):
                 valid_acc,
             ))
     with open(result_file_path, 'a') as f:
-        f.write('End Time%s\n' % (time.strftime('%m%d_%H%M_%S',time.localtime(time.time()))))
+        f.write('End Time %s\n' % (time.strftime('%m-%d %H:%M:%S',time.localtime(time.time()))))
 
 
-def test(test_loader):
+def test(model, test_loader):
     print("load model...")
     model.load_state_dict(torch.load('./result/model.dat'))#载入模型
     model.eval()
@@ -130,13 +130,13 @@ def load_data(config):
     mean = [0.5,]
     stdv = [0.2,]
     train_transforms = transforms.Compose([
-        transforms.Resize((640, 480)),
+        transforms.Resize((320, 240)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=stdv),
     ])
     test_transforms = transforms.Compose([
-        transforms.Resize((640, 480)),
+        transforms.Resize((320, 240)),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=stdv),
     ])
@@ -160,22 +160,21 @@ if __name__ == "__main__":
     #载入数据
     train_loader, valid_loader, test_loader = load_data(config)
 
-    #获取模型使用预训练参数
-    if config.model_class == 121:
-        model = models.densenet121(pretrained=True)
-        model.features.conv0 = nn.Conv2d(config.init_channel, 64, kernel_size=7, stride=2,padding=3, bias=False)
+    #模型参数配置
+    if config.model_class == 161:
+        model = models.densenet161(pretrained=True)
+        model.features.conv0 = nn.Conv2d(config.init_channel, 96, kernel_size=7, stride=2,padding=3, bias=False)#修改原始通道数
     else:
-        model.features.conv0 = nn.Conv2d(config.init_channel, 96, kernel_size=7, stride=2,padding=3, bias=False)
-        if config.model_class == 161:
-            model = models.densenet161(pretrained=True)
+        if config.model_class == 121:
+            model = models.densenet121(pretrained=True)
         elif config.model_class == 169:
             model = models.densenet169(pretrained=True)
         elif config.model_class == 201:
             model = models.densenet201(pretrained=True)
         else:
             print("模型选择错误！")
-    
-    #并修改原始通道数和分类数
+        model.features.conv0 = nn.Conv2d(config.init_channel, 64, kernel_size=7, stride=2,padding=3, bias=False)#修改原始通道数
+    #修改分类数
     num_ftrs = model.classifier.in_features
     model.classifier = nn.Linear(num_ftrs, config.classify)
     model.to(device)
@@ -184,4 +183,4 @@ if __name__ == "__main__":
     if config.train:
         train_valid(model, config, train_loader, valid_loader)
     else:
-        test(test_loader)
+        test(model, test_loader)

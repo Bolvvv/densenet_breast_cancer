@@ -19,8 +19,13 @@ class CustomDataset(Dataset):
 
         #对图片进行预处理
         img=self.transform(img)
-        
-        return img, int(label)
+        label_trans = int(label)
+        #将label中的0和1归为一类
+        if label_trans == 0 or label_trans == 1:
+            label_trans = 0
+        else:
+            label_trans = 1
+        return img, label_trans
     
     def __len__(self):
         data_len = len(self.image_label_list)
