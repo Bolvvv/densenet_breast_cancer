@@ -140,16 +140,23 @@ def load_data(config):
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=stdv),
     ])
-    train_set = CustomDataset(filename="../data/deepbc/labels_1218/train_CMGH.txt", image_dir="../data/deepbc/usg_images_cutted_v3", transform=train_transforms)
-    valid_set = CustomDataset(filename="../data/deepbc/labels_1218/valid_CMGH.txt", image_dir="../data/deepbc/usg_images_cutted_v3", transform=test_transforms)
-    test_set = CustomDataset(filename="../data/deepbc/labels_1218/valid_CMGH.txt", image_dir="../data/deepbc/usg_images_cutted_v3", transform=test_transforms)
+    #设置数据集载入
+    label_path = "../data/deepbc/labels_1218/"
+    image_path = "../data/deepbc/usg_images_cutted_v3"
+    train_set_list = [label_path+"train_BX.txt", label_path+"train_CMGH.txt", label_path+"train_Malignant_DeYang.txt", label_path+"train_WestChina.txt"]
+    valid_set_list = [label_path+"valid_BX.txt", label_path+"valid_CMGH.txt", label_path+"valid_Malignant_DeYang.txt", label_path+"valid_WestChina.txt"]
+    test_set_list = [label_path+"test_BX.txt", label_path+"test_CMGH.txt", label_path+"test_Malignant_DeYang.txt", label_path+"test_WestChina.txt"]
+
+    train_set = CustomDataset(data_set_list=train_set_list, image_dir=image_path, transform=train_transforms)
+    valid_set = CustomDataset(data_set_list=valid_set_list, image_dir=image_path, transform=test_transforms)
+    test_set = CustomDataset(data_set_list=test_set_list, image_dir=image_path, transform=test_transforms)
 
     #载入训练参数
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=config.batch_size, shuffle=True,
                                                pin_memory=(torch.cuda.is_available()))
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=config.batch_size, shuffle=True,
                                                pin_memory=(torch.cuda.is_available()))
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=config.batch_size, shuffle=False,
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=config.test_batch_size, shuffle=False,
                                               pin_memory=(torch.cuda.is_available()))
 
     return train_loader, valid_loader, test_loader
