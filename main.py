@@ -107,7 +107,6 @@ def train_valid(model, config, train_loader, valid_loader):
     with open(result_file_path, 'a') as f:
         f.write('End Time %s\n' % (time.strftime('%m-%d %H:%M:%S',time.localtime(time.time()))))
 
-
 def test(model, test_loader):
     print("load model...")
     model.load_state_dict(torch.load('./result/model.dat'))#载入模型
@@ -126,6 +125,17 @@ def test(model, test_loader):
             correct += (predicted == labels).sum().item()
         print('Test accuracy of the model on the test images: %.4f '% (100 * correct / total))
 
+def save_full_model(model, model_src_path, model_save_path):
+    """
+    将参数存储为完整模型
+    model:未实例化的模型
+    model_src_path:模型参数
+    model_save_path:完整模型存储地址
+    """
+    print("load model...")
+    model.load_state_dict(torch.load(model_src_path))#载入参数
+    torch.save(model, model_save_path)
+
 def load_data(config):
     mean = [0.5,]
     stdv = [0.2,]
@@ -140,12 +150,20 @@ def load_data(config):
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=stdv),
     ])
-    #设置数据集载入
-    label_path = "../data/deepbc/labels_1218/"
-    image_path = "../data/deepbc/usg_images_cutted_v3"
-    train_set_list = [label_path+"train_BX.txt", label_path+"train_CMGH.txt", label_path+"train_Malignant_DeYang.txt", label_path+"train_WestChina.txt"]
-    valid_set_list = [label_path+"valid_BX.txt", label_path+"valid_CMGH.txt", label_path+"valid_Malignant_DeYang.txt", label_path+"valid_WestChina.txt"]
-    test_set_list = [label_path+"test_BX.txt", label_path+"test_CMGH.txt", label_path+"test_Malignant_DeYang.txt", label_path+"test_WestChina.txt"]
+
+    #v3的测试数据集
+    # label_path = "../data/deepbc/labels_1218/"
+    # image_path = "../data/deepbc/usg_images_cutted_v3"
+    # train_set_list = [label_path+"train_BX.txt", label_path+"train_CMGH.txt", label_path+"train_Malignant_DeYang.txt", label_path+"train_WestChina.txt"]
+    # valid_set_list = [label_path+"valid_BX.txt", label_path+"valid_CMGH.txt", label_path+"valid_Malignant_DeYang.txt", label_path+"valid_WestChina.txt"]
+    # test_set_list = [label_path+"test_BX.txt", label_path+"test_CMGH.txt", label_path+"test_Malignant_DeYang.txt", label_path+"test_WestChina.txt"]
+
+    #p1的测试数据集
+    label_path = "../data/deepbc/labels_photo/"
+    image_path = "../data/deepbc/usg_images_cutted_p1"
+    train_set_list = [label_path+"train_WestChina.txt"]
+    valid_set_list = [label_path+"valid_WestChina.txt"]
+    test_set_list = [label_path+"test_WestChina.txt"]
 
     train_set = CustomDataset(data_set_list=train_set_list, image_dir=image_path, transform=train_transforms)
     valid_set = CustomDataset(data_set_list=valid_set_list, image_dir=image_path, transform=test_transforms)
@@ -191,3 +209,5 @@ if __name__ == "__main__":
         train_valid(model, config, train_loader, valid_loader)
     else:
         test(model, test_loader)
+    #存储完整模型
+    # save_full_model(model, './result/v3_result/model_161_93.67.dat', './best_model.pkl')
